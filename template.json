@@ -1,0 +1,1432 @@
+{
+    "Description": "Create a variable number of EC2 instance resources.",
+    "Parameters": {
+         "KeyName": {
+            "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instance",
+            "Type": "AWS::EC2::KeyPair::KeyName",
+            "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
+        },
+        "SSHLocation": {
+            "Description": "The IP address range that can be used to SSH to the EC2 instances",
+            "Type": "String",
+            "MinLength": "9",
+            "MaxLength": "18",
+            "Default": "0.0.0.0/0",
+            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+            "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x."
+        },
+        "InstanceCount": {
+            "Description": "Number of EC2 instances (must be between 1 and 20).",
+            "Type": "Number",
+            "Default": 1,
+            "MinValue": 1,
+            "MaxValue": 20,
+            "ConstraintDescription": "Must be a number between 1 and 20."
+        },
+        "ImageId": {
+            "Description": "Image ID to launch EC2 instances.",
+            "Type": "AWS::EC2::Image::Id",
+            "Default": "ami-000b19613678b598c"
+        },
+        "InstanceType": {
+            "Description": "Instance type to launch EC2 instances.",
+            "Type": "String",
+            "Default": "m3.medium",
+            "AllowedValues": [
+                "m3.medium",
+                "m3.large",
+                "m3.xlarge",
+                "m3.2xlarge"
+            ]
+        },
+        "Region":{
+            "Description": "AWS Region for this instance to be provisioned on",
+            "Type":"String",
+            "Default":"us-east-1",
+            "AllowedValues":["us-east-1","eu-west-1","ap-southeast-1"],
+            
+            "ConstraintDescription": "must be a valid Region."
+            
+        }
+    },
+     "Mappings": {
+        "AWSInstanceType2Arch": {
+            "m3.medium": {
+                "Arch": "HVM64"
+            },
+            "m3.large": {
+                "Arch": "HVM64"
+            }
+        },
+        "AWSRegionArch2AMI": {
+            "us-east-1": {
+                "HVM64": "ami-0f8612bb0a7507310"
+            },
+            "eu-west-1": {
+                "HVM64": "ami-0b6ffa70c9fdd523a"
+            },
+            "ap-southeast-1": {
+                "HVM64": "ami-02cddb74b4aee4da4"
+            }
+        }
+    },
+    "Conditions": {
+        "Launch1": {
+            "Fn::Equals": [
+                1,
+                1
+            ]
+        },
+        "Launch2": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        1,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                }
+            ]
+        },
+        "Launch3": {
+            "Fn::And": [
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                1,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                2,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        "Launch4": {
+            "Fn::And": [
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                1,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                2,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                3,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        "Launch5": {
+            "Fn::And": [
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                1,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                2,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                3,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                4,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+"Launch6": {
+            "Fn::And": [
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                1,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                2,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                3,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                4,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                5,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+"Launch7": {
+            "Fn::And": [
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                1,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                2,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                3,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                4,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                5,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                6,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+"Launch8": {
+            "Fn::And": [
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                1,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                2,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                3,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                4,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                5,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                6,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                7,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+"Launch9": {
+            "Fn::And": [
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                1,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                2,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                3,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                4,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                5,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                6,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                7,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                8,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+                },
+"Launch10": {
+            "Fn::And": [
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                1,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                2,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                3,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                4,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                5,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                6,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                7,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                8,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+{
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                9,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+}
+                    ]
+                },
+"Launch11": {
+            "Fn::And": [
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                1,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                2,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                3,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                4,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                5,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                6,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                7,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                8,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                9,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                10,
+                                {
+                                    "Ref": "InstanceCount"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+                },
+"Launch12": {
+            "Fn::Or": [
+                {
+                    "Fn::Equals": [
+                        12,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        13,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        14,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        15,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        16,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        17,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        18,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        19,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        20,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                }
+            ]
+        },
+        "Launch13": {
+            "Fn::Or": [
+                {
+                    "Fn::Equals": [
+                        13,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        14,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        15,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        16,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        17,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        18,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        19,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        20,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                }
+            ]
+        },
+        "Launch14": {
+            "Fn::Or": [
+                {
+                    "Fn::Equals": [
+                        14,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        15,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        16,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        17,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        18,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        19,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        20,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                }
+            ]
+        },
+        "Launch15": {
+            "Fn::Or": [
+                {
+                    "Fn::Equals": [
+                        15,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        16,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        17,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        18,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        19,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        20,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                }
+            ]
+        },
+        "Launch16": {
+            "Fn::Or": [
+                {
+                    "Fn::Equals": [
+                        16,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        17,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        18,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        19,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        20,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                }
+            ]
+        },
+        "Launch17": {
+            "Fn::Or": [
+                {
+                    "Fn::Equals": [
+                        17,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        18,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        19,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        20,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                }
+            ]
+        },
+        "Launch18": {
+            "Fn::Or": [
+                {
+                    "Fn::Equals": [
+                        18,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        19,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        20,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                }
+            ]
+        },
+        "Launch19": {
+            "Fn::Or": [
+                {
+                    "Fn::Equals": [
+                        19,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        20,
+                        {
+                            "Ref": "InstanceCount"
+                        }
+                    ]
+                }
+            ]
+        },
+        "Launch20": {
+            "Fn::Equals": [
+                20,
+                {
+                    "Ref": "InstanceCount"
+                }
+            ]
+        }
+    },
+"Resources": {
+        "InstanceSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Enable SSH access via port 22",
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "22",
+                        "ToPort": "22",
+                        "CidrIp": {
+                            "Ref": "SSHLocation"
+                        }
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "f80ce6a4-f5cf-44f3-be4a-84e6c11313f6"
+                }
+            }
+        },
+        "Instance1": {
+            "Condition": "Launch1",
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": {
+                    "Ref": "ImageId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                }
+            }
+        },
+        "Instance2": {
+            "Condition": "Launch2",
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": {
+                    "Ref": "ImageId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                }
+            }
+        },
+        "Instance3": {
+            "Condition": "Launch3",
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": {
+                    "Ref": "ImageId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                }
+            }
+        },
+        "Instance4": {
+            "Condition": "Launch4",
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": {
+                    "Ref": "ImageId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                }
+            }
+        },
+        "Instance5": {
+            "Condition": "Launch5",
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": {
+                    "Ref": "ImageId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                }
+            }
+        },
+        "Instance6": {
+            "Condition": "Launch6",
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": {
+                    "Ref": "ImageId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                }
+            }
+        },
+        "Instance7": {
+            "Condition": "Launch7",
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": {
+                    "Ref": "ImageId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                }
+            }
+        },
+        "Instance8": {
+            "Condition": "Launch8",
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": {
+                    "Ref": "ImageId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                }
+            }
+        },
+        "Instance9": {
+            "Condition": "Launch9",
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": {
+                    "Ref": "ImageId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                }
+            }
+        },
+        "Instance10": {
+            "Condition": "Launch10",
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": {
+                    "Ref": "ImageId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                }
+            }
+        },
+        "Instance11": {
+            "Condition": "Launch11",
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": {
+                    "Ref": "ImageId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                }
+            }
+        },
+        "Instance12": {
+            "Condition": "Launch12",
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": {
+                    "Ref": "ImageId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                }
+            }
+        },
+        "Instance13": {
+            "Condition": "Launch13",
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": {
+                    "Ref": "ImageId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                }
+            }
+        },
+        "Instance14": {
+            "Condition": "Launch14",
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": {
+                    "Ref": "ImageId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                }
+            }
+        },
+        "Instance15": {
+            "Condition": "Launch15",
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": {
+                    "Ref": "ImageId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                }
+            }
+        },
+        "Instance16": {
+            "Condition": "Launch16",
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": {
+                    "Ref": "ImageId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                }
+            }
+        },
+     "Instance17": {
+            "Condition": "Launch17",
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": {
+                    "Ref": "ImageId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                }
+            }
+        },
+        "Instance18": {
+            "Condition": "Launch18",
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": {
+                    "Ref": "ImageId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                }
+            }
+        },
+        "Instance19": {
+            "Condition": "Launch19",
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": {
+                    "Ref": "ImageId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                }
+            }
+        },
+        "Instance20": {
+            "Condition": "Launch20",
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": {
+                    "Ref": "ImageId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                }
+            }
+        }
+    }
+}
